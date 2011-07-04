@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <title>Ajax using separate thread - xhr as WebWorker</title>
+        <script type="text/javascript" src="./ajax.js"></script>
+        <script type="text/javascript" src="./Marquee/Marquee.js"></script>
+    </head>
+    <body>
+
+        <div id="time" style="font-size:140px">
+            <span id="h"></span>:<span id="m"></span>:<span id="s"></span><span id="u" style="font-size:100px;color:gray"></span>
+        </div>
+
+        <div id="timestamp" style="font-size:140px;"></div>
+
+        <script type="text/javascript">
+            (function(){
+                if(typeof Worker === 'undefined'){
+                    var d = document.createElement('div');
+                    d.innerHTML = 'Sorry, your browser does not support WebWorkers. See https://developer.mozilla.org/en/Using_web_workers#section_17 for supported browsers.';
+                    document.body.appendChild(d);
+                }
+
+                var send = function(){
+                    MJ.ajax({
+                        worker: true,
+                        url: './getDate.php?t=0',
+                        data: {},
+                        success: function(response){
+                            successHandler0(response);
+                        }
+                    });
+                    
+                    MJ.ajax({
+                        worker: true,
+                        url: './getDate.php?t=1',
+                        data: {},
+                        success: function(response){
+                            successHandler1(response);
+                        }
+                    });
+                    
+                };
+            
+                var addLeadingZeros = function(t){
+                    return t < 10 ? "0"+t : t;
+                };
+            
+                var successHandler0 = function(response){
+                    document.getElementById('h').innerHTML = addLeadingZeros(response.h);
+                    document.getElementById('m').innerHTML = addLeadingZeros(response.m);
+                    document.getElementById('s').innerHTML = addLeadingZeros(response.s);
+                    document.getElementById('u').innerHTML = response.u;
+                };
+                
+                var successHandler1 = function(response){
+                    document.getElementById('timestamp').innerHTML = response;
+                };
+                
+                send();
+                window.setInterval(send, 50);
+                
+            })();
+        </script>
+
+    </body>
+</html>
